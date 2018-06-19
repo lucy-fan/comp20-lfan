@@ -25,7 +25,6 @@ var markers = {
   ashmont: {"position": {lat: 42.284652, lng: -71.06448899999999}, "title": "Ashmont"},
 }
 
-
 function initMap() {
    map = new google.maps.Map(document.getElementById('map'), {
       center: {lat: 42.352271, lng: -71.05524200000001},
@@ -34,6 +33,7 @@ function initMap() {
 
    createMarkers();
    createRedLine();
+   getLocation();
 }
 
 // loops through the markers object and 
@@ -44,6 +44,7 @@ function createMarkers() {
   for (var key in markers) {
     addMarker(markers[key]["position"], markers[key]["title"]);
   }
+
 }
 
 // creates a marker and puts it on the map
@@ -57,6 +58,7 @@ function addMarker(location, name) {
 
   marker.setMap(map);
 }
+
 
 //creates two polylines to represent the branching at JFK
 
@@ -104,3 +106,23 @@ function createRedLine() {
   altRedLine.setMap(map);
 }
 
+// sees if navigator.geolocation works on user's browser
+function getLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(showPosition);
+  } 
+}
+
+
+//finds user latitude and longitude and creates marker for user's position
+function showPosition(position) {
+  var userLat = position.coords.latitude;
+  var userLng = position.coords.longitude;
+
+  var marker = new google.maps.Marker({
+    position: {lat: userLat, lng: userLng},
+    title: "Current Location"
+  });
+
+  marker.setMap(map);
+}
