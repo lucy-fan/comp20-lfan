@@ -1,1 +1,12 @@
-/* Your CSS here... */
+/* CSS for messages */
+
+body {
+	font-family: Tahoma, Geneva, sans-serif;
+	text-align: center;
+}
+
+#messages {
+	color: black;
+	text-align: left;
+}
+
