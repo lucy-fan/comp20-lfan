@@ -1,7 +1,7 @@
 var map;
 
 var markers = {
-     alewife: {"position": {lat: 42.39674, lng: -71.121815}, "title": "Alewife", "id": "place-alfcl"},
+     alewife: {"position": {lat: 42.395428, lng: -71.142483}, "title": "Alewife", "id": "place-alfcl"},
      davis: {"position": {lat: 42.39674, lng: -71.121815}, "title": "Davis", "id": "place-davis"},
      porterSquare: {"position": {lat: 42.3884, lng: -71.11914899999999}, "title": "Porter Square", "id": "place-portr"},
      harvardSquare: {"position": {lat: 42.373362, lng: -71.118956}, "title": "Harvard Square", "id": "place-harsq"},
@@ -66,10 +66,20 @@ function addMarker(location, name, key) {
           icon: image
      });
 
+     console.log(location);
+
      marker.setMap(map);
      marker_times[key] = marker;
 
      upcomingTrains(markers[key]["id"], addTimes, key);
+
+     marker.addListener('click', function() {
+          var url = "https://thawing-refuge-90938.herokuapp.com/redline/count?stop_id=" + markers[key]["id"];
+          var xhttp = new XMLHttpRequest();
+          xhttp.overrideMimeType("application/json");
+          xhttp.open("POST", url, true);
+          xhttp.send();
+     });
 }
 
 /////////////////////////////////////////////////////////
@@ -78,7 +88,7 @@ function addMarker(location, name, key) {
 /////////////////////////////////////////////////////////
 function upcomingTrains(id, call, key) {
      var upcomingTimes = "";
-     var url = "https://defense-in-derpth.herokuapp.com/redline/schedule.json?stop_id=" + id;
+     var url = "https://thawing-refuge-90938.herokuapp.com/redline/schedule.json?stop_id=" + id;
      var xhttp = new XMLHttpRequest();
      xhttp.overrideMimeType("application/json");
      xhttp.onreadystatechange = function() {
