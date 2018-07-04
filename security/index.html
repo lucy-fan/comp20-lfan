@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Not Foursquare Security Assessment</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="style.css"/>
+  </head>
+  <body>
+    <h1>Security Assessment of Not Foursquare</h1>
+    <h5>By Lucy Fan (COMP 20 Summer 2018)</h5>
+    <hr width="80%">
+
+  	<h1>Introduction</h1>
+  	<p>I was hired as a security consultant to document and resolve security and privacy issues in a web application thoughtfully named "Not Foursquare". Despite the name, the app resembles many aspects of the existing web application Foursquare. It takes in user data such as a login, coordinates, and current date to keep track of where users have been checking in at what times in what places.</p>
+    <p>While the application can be run in a modern web browser without HTML issues, there are a few security and privacy issues that still remain within this application. This document is to identify and discuss these issues, as well as suggest a possible solution for these issues.</p>
+    <hr width="80%">
+
+  	<h1>Methodology</h1>
+  	<p>I tested this application by running all code locally, using my own local mongo instance instead of the web application's. I originally began testing it using the provided live version online without looking at the source code, or "black-box" testing. Afterwards, using curl and simply reading the source code, I managed to discover multiple vulnerabilities, which are listed below.</p>
+    <hr width="80%">
+
+  	<h1>Abstract of Findings</h1>
+  	<p>Although Not Foursquare appears to be functioning flawlessly, security and privacy need to be greatly enhanced. Currently, attackers can submit unexpected login information that could corrupt the home page, where the login info is displayed. In addition, there is no way to validate who can access the data, as it is currently set to be able to show the application's data to just about anybody. Not FourSquare and other sites who rely on this application for information are at risk of attackers unless proper security checks are implemented against user input and who can access the site.</p>
+    <hr width="80%">
+
+  	<h1>Issues Found</h1>
+  	<p><strong>Issue:</strong> Cross-Site Scripting</p>
+    <p><strong>Location:</strong> /sendLocation and /submit</p>
+    <p><strong>Severity of issue:</strong> High. This can be easily used to compromise what the users receive.</p>
+    <p><strong>Description of issue:</strong> I used a curl command to submit to the sendLocation POST API, with login=< iframe width="560" height="315" src="https://www.youtube.com/embed/hy6oaDzy0-Q">< /iframe>". When I accessed the home page, there was a youtube video instead of a login. While this cute animal video is not particularly menacing, it can be used for malicious purposes. The /submit POST API acts the same as the sendLocation POST API, which means it has the same issue as I mentioned above.</p>
+    <p><strong>Proof of vulnerability:</strong></p><img src = xss.png>
+    <p><strong>Resolution:</strong> This issue can be resolved by having some code that checks whether or not the login value is a string.</p>
+    <hr width="80%">
+
+    <p><strong>Issue:</strong> Uncaught Reference Error</p>
+    <p><strong>Location:</strong> /</p>
+    <p><strong>Severity of issue:</strong> Low. Home page cannot be accessed, which can be easily fixed if XSS is also fixed.</p>
+    <p><strong>Description of issue:</strong> I used a curl command to submit to the sendLocation POST API, with login=< iframe width="560" height="315" src="https://www.youtube.com/embed/hy6oaDzy0-Q">< /iframe>". When I accessed the home page, there was a youtube video instead of a login. While this cute animal video is not particularly menacing, it can be used for malicious purposes. The /submit POST API acts the same as the sendLocation POST API, which means it has the same issue as I mentioned above.</p>
+    <p><strong>Proof of vulnerability:</strong></p><img src = ref.png>
+    <p><strong>Resolution:</strong> Again, this issue can be resolved by having some code that checks whether or not the login value is a string. This will prevent both malicious code and uncaught reference errors.</p>
+    <hr width="80%">
+
+    <p><strong>Issue:</strong> CORS Universally Allowed</p>
+    <p><strong>Location:</strong> /sendLocation</p>
+    <p><strong>Severity of issue:</strong> Low. There should be some sort of validation required when accessing this information even though users can technically already access this information publicly.</p>
+    <p><strong>Description of issue:</strong> Having CORS universally allowed means that anything and anyone can access this branch. In general, this is just bad practice. As I quote, "never trust user input".</p>
+    <p><strong>Proof of vulnerability:</strong>Found in the source code, in server-vuln.js on line 52.</p>
+    <p><strong>Resolution:</strong> This can be resolved by adding a form of authentication via the withCredentials property on XMLHttpRequest.</p>
+    <hr width="80%">
+
+    <p><strong>Issue:</strong> NoSQL Injection</p>
+    <p><strong>Location:</strong> /checkins.json</p>
+    <p><strong>Severity of issue:</strong> Medium. Although all the information in the database is eventually released publicly via the index page or sendLocation, it is bad to leave something as vulnerable as the possibility of a NoSQL injection available to attackers.</p>
+    <p><strong>Description of issue:</strong>While testing whether checkins.json was liable to attacks, I tried many different queries. Although it accounts for some attacks by modifying the query to an array before searching, it does not cover all the bases. As an example, when I visited /checkins.json?login[$ne]="", all objects in the database were returned.</p>
+    <p><strong>Proof of vulnerability:</strong></p><img src = injection.png>
+    <p><strong>Resolution:</strong> This can be resolved by validating inputs. For example, using mongo-sanitize will strip any keys that contain $.<br> 
+    <center><code>var sanitize = require('mongo-sanitize');<br>
+    var login = sanitize(req.query.login);</code></center></p>
+    <hr width="80%">
+
+  	<h1>Conclusion</h1>
+  	<p>Resolving these issues will no doubt improve the quality of security and privacy within Not Foursquare, and all of these improvements are not too diffcult to implement. However, thought should be put into the overall accessibility of this web application—objects in the database are not only easily accessible from /checins.json, but /sendLocation automatically responds with all the results from the database, which may not be what is ideal for the application. Overall, fixing all these issues should amount to no more than $500.</p>
+  </body>
+</html>
